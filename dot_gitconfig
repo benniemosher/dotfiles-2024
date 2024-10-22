@@ -1,0 +1,36 @@
+[user]
+	name = Bennie Mosher
+  	email = benniemosher@gmail.com
+[alias]
+	s = status
+	co = checkout
+	cp = cherry-pick
+	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f"
+[credential]
+	helper = cache --timeout=3600
+[core]
+	editor = vim
+	excludesfile = ~/.gitignore_global
+	ignorecase = false
+[push]
+	default = current
+[pull]
+	default = current
+	ff = only
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[init]
+	defaultBranch = main
+[safe]
+	directory = /opt/homebrew
+[credential "https://github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[includeIf "gitdir:/Users/bmosher/Code/dotfiles"]
+	path = /Users/bmosher/Code/.gitconfig-dotfiles
