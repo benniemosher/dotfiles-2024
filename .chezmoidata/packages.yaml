@@ -28,5 +28,9 @@ packages:
       - "grammarly-desktop"
       - "iterm2"
       - "keybase"
+      - "visual-studio-code"
       - "yubico-yubikey-manager"
       - "zoom"
+    vscode:
+      - "enkia.tokyo-night"
+      - "ms-vscode-remote.remote-containers"
