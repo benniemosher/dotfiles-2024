@@ -33,6 +33,5 @@ cask "yubico-yubikey-manager"
 cask "zoom"
 mas "1Password for Safari", id: 1569813296
 mas "Amphetamine", id: 937984704
-mas "Numbers", id: 409203825
 vscode "enkia.tokyo-night"
 vscode "ms-vscode-remote.remote-containers"
