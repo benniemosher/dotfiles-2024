@@ -49,6 +49,8 @@ export PATH=$HOME/bin:$PATH
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+export GH_PACKAGES_PAT=$( gh auth token )
+
 (figlet -w 100 -f doom $(hostname -s); fortune | cowthink -f stegosaurus) | lolcat
 
 {{ if eq .chezmoi.os "darwin" }}
