@@ -11,6 +11,7 @@ packages:
       - "fortune"
       - "gh"
       - "gnupg"
+      - "infisical"
       - "lolcat"
       - "mas"
       - "mise"

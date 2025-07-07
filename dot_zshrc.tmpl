@@ -41,6 +41,13 @@ else
     print "404: $local_profile not found."
 fi
 
+aws_zshrc="$HOME/.zshrc.aws.local"
+if [ -f $aws_zshrc ]; then
+    source $aws_zshrc
+else
+    print "404: $aws_zshrc not found."
+fi
+
 export PATH=$HOME/.local/bin:$PATH
 export KUBECONFIG=$HOME/k3s.yaml
 export GH_PACKAGES_PAT=$( gh auth token )
