@@ -1,0 +1,95 @@
+# Alias: awsp - Quick AWS Profile Selector and Exporter
+# Description: Interactively select an AWS profile and export it as AWS_PROFILE environment variable
+#              Uses fzf if available, otherwise falls back to bash's built-in select menu
+alias awsp="export AWS_PROFILE=\$(_awsp)"
+
+# Alias: awsu - Unset AWS Profile
+# Description: Removes the AWS_PROFILE environment variable from the current shell session
+alias awsu="unset AWS_PROFILE"
+
+alias awsloginprog="prog_auth.sh"
+
+export REQUESTS_CA_BUNDLE="$HOME/FA_Root_CA.pem"
+export SSL_CERT_FILE="$HOME/FA_Root_CA.pem"
+export AWS_CA_BUNDLE="/etc/ssl/cert.pem"
+
+# aws configure list-profiles | fzf
+_awsp () {
+  if [[ "$1" == "--no-programmatic" ]]; then
+    aws configure list-profiles | grep -v programmatic | fzf --prompt "Choose AWS profile: "
+  else
+    aws configure list-profiles | fzf --prompt "Choose AWS profile: "
+  fi
+}
+
+# Function: awslogin
+# Purpose: Interactive AWS SSO login using aws-azure-login with profile selection
+# Usage: awslogin
+# Description:
+#   1. Prompts user to select an AWS profile using _awsp function
+#   2. Validates the selected profile
+#   3. Sets AWS_PROFILE environment variable for the current session
+#   4. Launches aws-azure-login in GUI mode using Microsoft Edge
+awslogin() {
+  # Prompt user to select a non-programmatic AWS profile using _awsp
+  local PROFILE
+  PROFILE=$(_awsp)
+
+  if [[ $? -ne 0 || -z "$PROFILE" ]]; then
+    echo "No AWS Profile selected or an error occurred. Aborting aws-azure-login."
+    return 1
+  fi
+
+  # Set the AWS_PROFILE environment variable for this shell session
+  export AWS_PROFILE="$PROFILE"
+  echo "AWS_PROFILE set to: $PROFILE"
+
+  # Launch aws-azure-login in GUI mode using Microsoft Edge as the browser
+  echo "Launching aws-azure-login in GUI mode..."
+  PUPPETEER_EXECUTABLE_PATH="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge" aws-azure-login --mode gui
+}
+
+# Function: _awsp (Private Helper Function)
+# Purpose: Interactive AWS profile selector with fallback support
+# Usage: _awsp (typically called by other functions, not directly)
+# Description:
+#   - Retrieves list of AWS profiles from aws-cli configuration
+#   - Uses fzf for enhanced selection if available
+#   - Falls back to bash's built-in select menu if fzf is not installed
+#   - Outputs selected profile name to stdout for capture by calling function
+_awsp() {
+  # Get the list of AWS profiles from aws-cli configuration
+  local PROFILES
+  PROFILES=$(aws configure list-profiles 2>/dev/null)
+
+  # Check if profiles were retrieved successfully
+  if [[ -z "$PROFILES" ]]; then
+    echo "No AWS profiles found or AWS CLI is not configured properly." >&2
+    return 1
+  fi
+
+  # Check if fzf (fuzzy finder) is available in PATH
+  if command -v fzf >/dev/null 2>&1; then
+    # Use fzf if available
+    # Pipe the profiles list to fzf with a custom prompt
+    # fzf returns the selected line to stdout
+    echo "$PROFILES" | fzf --prompt "Choose AWS profile: "
+  else
+    # Fall back to bash's built-in select menu
+    local PROFILE_ARRAY=()
+    while IFS= read -r PROFILE; do
+      PROFILE_ARRAY+=("$PROFILE")
+    done <<< "$PROFILES"
+
+    echo "Choose AWS profile:" >&2
+
+    select SELECTED_PROFILE in "${PROFILE_ARRAY[@]}"; do
+      if [[ -n "$SELECTED_PROFILE" ]]; then
+        echo "$SELECTED_PROFILE"
+        break
+      else
+        echo "Invalid selection. Please try again." >&2
+      fi
+    done
+  fi
+}
